@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# -----------------------------------------------
+# This idempotent macOS Bash script uses
+# Homebrew to install basic dev tools such as
+# vim and git
+# Note that this installs the Janus vim plugins
+# -----------------------------------------------
+
+# Exit script on any errors
+set -e
+
+echo "Homebrew installing basic development tools..."
+# ADD/CHANGE basic dev tools here
+dev_tools=(
+  git
+  vim
+)
+
+echo "Homebrew is required..."
+echo '--->'
+brew help || \
+  (echo "FAIL [1] - Homebrew must be installed first" ; exit 1)
+
+for tool in ${dev_tools[@]}; do
+  echo -e "\nInstalling [${tool}]"
+  echo '--->'
+  brew list "$tool" || \
+    (echo "Brew Installing [${tool}]"; brew install "$tool")
+  echo -e '<---\n'
+done
+
+echo -e "\nInstalling Janus vim plugins"
+# Install script from https://github.com/carlhuda/janus
+# Checking if Janus is already installed from the install script
+# https://github.com/carlhuda/janus/blob/master/bootstrap.sh
+echo '--->'
+test -e ~/.vim/janus || \
+  (echo "Installing Janus" ; curl -L https://bit.ly/janus-bootstrap | bash)
+echo -e '<---\n'
+
+echo "Disabling tlib plugin for E1208: error"
+echo '--->'
+grep "call janus#disable_plugin('tlib')" ~/.vimrc.before || \
+  (echo "call janus#disable_plugin('tlib')") >> ~/.vimrc.before
+echo -e '<---\n'
+
+# --- FIN ---
+echo "...basic development tools should be installed"
+exit 0

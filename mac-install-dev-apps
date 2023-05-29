@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# -----------------------------------------------
+# This idempotent macOS Bash script uses
+# Homebrew Cask to install basic dev apps...
+# - Browsers
+#   - Chrome
+#   - Firefox
+# - Docker Desktop
+# - VS Code
+# -----------------------------------------------
+
+# Exit script on any errors
+set -e
+
+echo "Homebrew installing basic development tools..."
+# ADD/CHANGE dev apps here
+dev_apps=(
+  google-chrome
+  firefox
+  docker
+  visual-studio-code
+)
+
+echo "Homebrew is required..."
+echo '--->'
+brew help || \
+  (echo "FAIL [1] - Homebrew must be installed first" ; exit 1)
+
+for app in ${dev_apps[@]}; do
+  echo -e "\nInstalling [${app}]"
+  echo '--->'
+  brew list --cask "$app" || \
+    (echo "Brew Installing Cask [${app}]"; brew install --cask "$app")
+  echo -e '<---\n'
+done
+
+# --- FIN ---
+echo "...basic development apps should be installed"
+exit 0
