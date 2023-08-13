@@ -9,41 +9,38 @@
 # Exit script on any errors
 set -e
 
-echo "Homebrew installing basic development tools..."
+echo "Homebrew installing basic development tools:"
 # ADD/CHANGE basic dev tools here
 dev_tools=(
   git
   vim
 )
 
-echo "Homebrew is required..."
-echo '--->'
+# Homebrew is required
 brew help || \
   (echo "FAIL [1] - Homebrew must be installed first" ; exit 1)
+echo -n '.'
 
+# Install dev tools
 for tool in ${dev_tools[@]}; do
-  echo -e "\nInstalling [${tool}]"
-  echo '--->'
   brew list "$tool" || \
-    (echo "Brew Installing [${tool}]"; brew install "$tool")
-  echo -e '<---\n'
+    (echo "brew install ${tool}"; brew install "$tool")
 done
+echo -n '.'
 
-echo -e "\nInstalling Janus vim plugins"
+# Install Janus vim plugins
 # Install script from https://github.com/carlhuda/janus
 # Checking if Janus is already installed from the install script
 # https://github.com/carlhuda/janus/blob/master/bootstrap.sh
-echo '--->'
 test -e ~/.vim/janus || \
   (echo "Installing Janus" ; curl -L https://bit.ly/janus-bootstrap | bash)
-echo -e '<---\n'
+echo -n '.'
 
-echo "Disabling tlib plugin for E1208: error"
-echo '--->'
+# Disable tlib plugin for E1208: error
 grep "call janus#disable_plugin('tlib')" ~/.vimrc.before || \
   (echo "call janus#disable_plugin('tlib')") >> ~/.vimrc.before
-echo -e '<---\n'
+echo -n '.'
 
 # --- FIN ---
-echo "...basic development tools should be installed"
+echo '✔'
 exit 0

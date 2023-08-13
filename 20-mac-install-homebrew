@@ -7,51 +7,43 @@
 # Exit script on any errors
 set -e
 
-echo -e "Installing Command Line Tools and Homebrew...\n"
+echo "Installing Command Line Tools and Homebrew:"
 
-echo "The Apple Xcode application is required..."
+# XCode is required from App Store
 # `xcodebuild -version` is the command to determine if Xcode
 # is installed, from...
 # https://stackoverflow.com/questions/33732042/check-xcode-version-from-command-line
-echo '--->'
 xcodebuild -version || \
   (echo "FAIL [1] - Xcode must be installed first" ; exit 1)
-echo -e '<---\n'
+echo -n '.'
 
-echo "Installing Command Line Tools for Xcode..."
-# unless_exists_install "Command Line Tools" "xcode-select -p" "xcode-select --install"
-echo '--->'
+# Install Command Line Tools for Xcode...
 xcode-select -p || \
   xcode-select --install
-echo -e '<---\n'
+echo -n '.'
 
-echo "  Verifying..."
-# gcc should be installed with Command Line Tools
-echo '--->'
+# Verify - gcc should be installed with Command Line Tools
 gcc --version || \
     (echo "FAIL [2] - Command Line Tools with gcc must be installed" ; exit 1)
-echo -e '<---\n'
+echo -n '.'
 
-echo "Installing Homebrew Package Manager..."
+# Install Homebrew Package Manager..."
 # From https://brew.sh/ May 2023
-echo '--->'
 brew help || \
   (/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || \
     echo "FAIL [3] - Unable to install Homebrew" ; exit 1)
-echo -e '<---\n'
+echo -n '.'
 
-
-echo "Adding brew shellenv to your ~/.zshrc file"
+# Add brew shellenv to your ~/.zshrc file"
 # This is inside baseball from the brew install script
 # Determine where brew itself is installed based on Intel vs Apple Silicon
 [[ `uname -m` == "arm64" ]] && homebrew_prefix="/opt/homebrew" || homebrew_prefix="/usr/local"
-echo '--->'
 grep -qs "eval \"\$(${homebrew_prefix}/bin/brew shellenv)\"" ~/.zshrc || \
   (echo; \
   echo '# Add Homebrew package management to shell environment'; \
   echo "eval \"\$(${homebrew_prefix}/bin/brew shellenv)\"") >> ~/.zshrc
-echo -e '<---\n'
+echo -n '.'
 
 # --- FIN ---
-echo "...Command Line Tools and Homebrew should be installed"
+echo '✔'
 exit 0

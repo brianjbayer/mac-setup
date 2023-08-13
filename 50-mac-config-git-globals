@@ -14,10 +14,12 @@ git_custom_settings=(
   "pull.ff:only"
 )
 
-echo "Configuring Git Globals..."
+echo "Configuring Git Globals:"
+
+# Configure Git Globals
 git_config_settings=()
 
-echo -e "\nDetermining global user settings..."
+# Determine global user settings
 git_user_settings=(
   user.name
   user.email
@@ -30,10 +32,11 @@ for user_setting in ${git_user_settings[@]}; do
     git_config_settings+=("${user_setting}:${setting_value}")
   fi
 done
+echo -n '.'
 
-echo -e "\nDetermining global gitignore file..."
+# Determine global gitignore file
 if [[ `git config --global core.excludesfile` == "" ]]; then
-  echo "...creating ~/.gitignore"
+  echo "Creating ~/.gitignore"
   test -e ~/.gitignore || \
     cat << EOF > ~/.gitignore
 # Global gitignore
@@ -46,11 +49,12 @@ if [[ `git config --global core.excludesfile` == "" ]]; then
 .vscode/
 EOF
 
-  # Add gitignore configuration for lates
+  # Add gitignore configuration
   git_config_settings+=("core.excludesfile:~/.gitignore")
 fi
+echo -n '.'
 
-echo -e "\nConfiguring git settings..."
+# Configure git settings
 # Add custom settings
 git_config_settings+=("${git_custom_settings[@]}")
 for config_setting in ${git_config_settings[@]}; do
@@ -59,10 +63,15 @@ for config_setting in ${git_config_settings[@]}; do
   setting="${setting_value[0]}"
   value="${setting_value[1]}"
   if [[ `git config --global "${setting}"` == "" ]]; then
-    echo "...setting [${setting}] to [${value}]"
+    echo "Setting [${setting}] to [${value}]"
     git config --global "${setting}" "${value}"
   fi
 done
+echo -n '.'
 
 echo -e "\nGit Configuration..."
 git config --list
+
+# --- FIN ---
+echo '✔'
+exit 0
