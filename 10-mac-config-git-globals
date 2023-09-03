@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# -----------------------------------------------
+# This idempotent macOS Bash script configures
+# git globals user name and password,
+# ~/.gitignore and custom settings
+# -----------------------------------------------
+
+# Exit script on any errors
+set -e
+
+# -- Functions --
+usage() {
+  cat << EOF
+Usage: $(basename $0) [-fh] [-e user.name] [-u user.email]
+  -f                     force install and overwrite existing
+  -h                     display help
+  -d init.defaultBranch  default branch when initializing
+  -e user.email          git account email address
+  -u user.name           git account username
+EOF
+}
+
+configure_git_setting() {
+  git_setting=$1
+  setting_value=$2
+  if [[ ! -z ${force_overwrite} || \
+    `git config --global "${git_setting}"` == "" ]]
+  then
+    [[ -z "${setting_value}" ]] && read -p "Please enter your git ${git_setting}: " setting_value
+    echo "Setting [${git_setting}] to [${setting_value}]"
+    git config --global "${git_setting}" "${setting_value}"
+  fi
+}
+
+# -- Command Line Options --
+# Command line arguments over interactive
+while getopts 'e:d:fhp:u:' opt; do
+  case "$opt" in
+
+    d)
+      default_branch="$OPTARG"
+      ;;
+
+    e)
+      user_email="$OPTARG"
+      ;;
+
+    f)
+      force_overwrite="true"
+      ;;
+
+    p)
+      pull_ff="$OPTARG"
+      ;;
+
+    u)
+      user_name="$OPTARG"
+      ;;
+
+    ?|h)
+    usage
+    exit
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+# -- MAIN --
+# Configure required
+configure_git_setting  user.name ${user_name}
+configure_git_setting  user.email ${user_email}
+
+# Configure preferences (options override)
+# Default branch is main
+configure_git_setting init.defaultBranch ${default_branch:=main}
+# Default pull is fast-forward
+configure_git_setting pull.ff ${pull_ff:=only}
+
+# Create and configure global gitignore file
+  if [[ ! -z ${force_overwrite} || \
+    `git config --global core.excludesfile` == "" ]]
+  then
+    [[ -e ~/.gitignore ]] || \
+    echo "Creating ~/.gitignore"
+      cat << EOF > ~/.gitignore
+# Global gitignore
+
+# Mac
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+EOF
+fi
+
+# Add the global gitignore to git config
+configure_git_setting  core.excludesfile ~/.gitignore
+
+# Output git configuration
+echo -e "\nGit Configuration..."
+git config --list
