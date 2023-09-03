@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# -----------------------------------------------
+# This idempotent macOS Bash script creates
+# and adds a new ssh key
+# -----------------------------------------------
+
+# Exit script on any errors
+set -e
+
+# -- Functions --
+usage() {
+  cat << EOF
+Usage: $(basename $0) [-h] [-b bitrate] [-C emailaddress] [-f keyfile] [-i hostname] [-t encryptionalgorithm]
+  -h                      display help
+  -b bitrate              encryption bitrate
+  -C emailaddress         email address for key
+  -f keyfile              specify keyfile name
+  -i hostname             configures .ssh for the key
+  -t encryptionalgorithm  supports [dsa | ecdsa | ed25519 | rsa]
+EOF
+}
+
+# -- Command Line Options --
+# Command line arguments over interactive
+while getopts 'b:C:f:hi:t:' opt; do
+  case "$opt" in
+    b)
+      bitrate="$OPTARG"
+      ;;
+
+    C)
+      email_address="$OPTARG"
+      ;;
+
+    f)
+      key_file="$OPTARG"
+      ;;
+
+    i)
+      hostname="$OPTARG"
+      ;;
+
+    t)
+      algorithm="$OPTARG"
+      ;;
+
+    ?|h)
+    usage
+    exit
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+# -- MAIN --
+echo "Generating and adding new SSH key:"
+
+# Get ssh key file name (or not)
+[[ -z "${key_file}" ]] && \
+  read -p "Please ENTER the file name (with path) for your new SSH key (optional): " key_file
+
+# Encryption algorithms (-t): dsa | ecdsa | ed25519 | rsa]
+# Default is ed25519
+[[ -z "${algorithm}" ]] && \
+  read -p "Please ENTER an encryption algorithm [dsa | ecdsa | ed25519 | rsa]: (ed25519) " algorithm
+algorithm=${algorithm:=ed25519}
+
+# Default ssh directory
+ssh_directory="$(echo ~)/.ssh"
+
+# Default key file is based on algorithm
+[[ -z "${key_file}" ]] && \
+  key_file="${ssh_directory}/id_${algorithm}"
+
+# Determine if key file already exists
+[[ -f "${key_file}" ]] && \
+  (>&2 echo "${key_file} already exists" ; exit 1)
+
+# Get optional encryption bitrate
+[[ -z "${bitrate}" ]] && \
+  read -p "Please ENTER an encryption bitrate (optional): " bitrate
+[[ -z "${bitrate}" ]] || \
+  options=" -b ${bitrate}"
+
+# Get required email address for key
+[[ -z "${email_address}" ]] && \
+  read -p "Please ENTER associated email address (REQUIRED): " email_address
+[[ -z "${email_address}" ]] && \
+  (>&2 echo "email address can not be blank" ; exit 2)
+
+# - Generate ssh key -
+echo "Generating SSH key '${key_file}' '${algorithm} ${options}' '${email_address}'..."
+# https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+# NOTE: Do not send bare quotes to ssh-keygen
+ssh-keygen -f "${key_file}" -t "${algorithm}" ${options} -C "${email_address}"
+
+# - Add ssh key -
+echo "Adding SSH Key from ${key_file}..."
+# APPLE_SSH_ADD_BEHAVIOR=macos to avoid any issue with adding keychain
+env APPLE_SSH_ADD_BEHAVIOR=macos ssh-add -K "${key_file}"
+
+# - Add ssh key to config file -
+ssh_config_file="${ssh_directory}/config"
+[[ -f "${ssh_config_file}" ]] && echo "${ssh_config_file} exists"
+
+[[ -z "${hostname}" ]] && \
+  read -p "Please ENTER a hostname : (github.com) " hostname
+hostname=${hostname:=github.com}
+
+echo "Adding SSH Config for ${key_file} to ${ssh_config_file}..."
+grep "IdentityFile ${key_file}" ${ssh_config_file} || \
+  cat << EOF >> ${ssh_config_file}
+Host ${hostname}
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ${key_file}
+EOF
+
+echo "SSH Config (${ssh_config_file})..."
+cat "${ssh_config_file}"

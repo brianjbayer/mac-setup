@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# -----------------------------------------------
+# This idempotent macOS Bash script uses
+# Homebrew Cask to install basic dev apps...
+# - Browsers
+#   - Chrome
+#   - Firefox
+# - Docker Desktop
+# - VS Code
+# -----------------------------------------------
+
+# Exit script on any errors
+set -e
+
+# -- Functions --
+usage() {
+  cat << EOF
+Usage: $(basename $0) [-h] [-a app-list]
+  -h           display help
+  -a app-list  list of brew cask apps to install
+               e.g. -a "docker visual-studio-code"
+EOF
+}
+
+# -- Command Line Options --
+# Command line arguments over interactive
+while getopts 'a:h' opt; do
+  case "$opt" in
+
+    a)
+      dev_apps="$OPTARG"
+      ;;
+
+    ?|h)
+    usage
+    exit
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+# -- MAIN --
+# Set dev apps (defaults)
+[[ -z "${dev_apps}" ]] && \
+  dev_apps=(
+    google-chrome
+    firefox
+    docker
+    visual-studio-code
+  )
+
+echo "Homebrew installing apps [${dev_apps[*]}]"
+
+# Homebrew is required
+brew help || \
+  (echo "FAIL [1] - Homebrew must be installed first" ; exit 1)
+
+# Install app (or not)
+for app in ${dev_apps[@]}; do
+  brew list --cask "$app" || \
+    (echo "brew install --cask ${app}"; brew install --cask "$app")
+done

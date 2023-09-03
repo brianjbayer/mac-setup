@@ -9,8 +9,7 @@
 # Exit script on any errors
 set -e
 
-echo "Homebrew installing basic development tools:"
-# ADD/CHANGE basic dev tools here
+echo "Homebrew installing git and vim with janus extensions:"
 dev_tools=(
   git
   vim
@@ -19,14 +18,12 @@ dev_tools=(
 # Homebrew is required
 brew help || \
   (echo "FAIL [1] - Homebrew must be installed first" ; exit 1)
-echo -n '.'
 
 # Install dev tools
 for tool in ${dev_tools[@]}; do
   brew list "$tool" || \
     (echo "brew install ${tool}"; brew install "$tool")
 done
-echo -n '.'
 
 # Install Janus vim plugins
 # Install script from https://github.com/carlhuda/janus
@@ -34,13 +31,7 @@ echo -n '.'
 # https://github.com/carlhuda/janus/blob/master/bootstrap.sh
 test -e ~/.vim/janus || \
   (echo "Installing Janus" ; curl -L https://bit.ly/janus-bootstrap | bash)
-echo -n '.'
 
 # Disable tlib plugin for E1208: error
 grep "call janus#disable_plugin('tlib')" ~/.vimrc.before || \
   (echo "call janus#disable_plugin('tlib')") >> ~/.vimrc.before
-echo -n '.'
-
-# --- FIN ---
-echo '✔'
-exit 0
