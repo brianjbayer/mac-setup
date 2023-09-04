@@ -46,3 +46,10 @@ your own applications to install
 ```
 ./mac-install-dev-apps -a "docker visual-studio-code"
 ```
+
+#### Homebrew Install `rbenv`
+Homebrew install `rbenv` and add its initialization
+to your `.zshrc` file
+```
+./mac-install-rbenv
+```
