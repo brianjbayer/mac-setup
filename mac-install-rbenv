@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# -----------------------------------------------
+# This idempotent macOS Bash script uses
+# Homebrew to install rbenv Ruby Version Manager
+# -----------------------------------------------
+
+# Exit script on any errors
+set -e
+
+echo "Installing rbenv and adding to ~/.zshrc:"
+
+# Homebrew is required
+brew help || \
+  (echo "FAIL [1] - Homebrew must be installed first" ; exit 1)
+
+# Install rbenv (or not)
+brew list rbenv || \
+  brew install rbenv
+
+# Modify .zshrc to add RUBY_CONFIGURE_OPTS with brew ssl
+user_home_directory=$(echo ~)
+zshrc_file="${user_home_directory}/.zshrc"
+[[ -f "${zshrc_file}" ]] && echo "${zshrc_file} exists"
+
+grep 'RUBY_CONFIGURE_OPTS' "${zshrc_file}" || \
+  (echo "Adding RUBY_CONFIGURE_OPTS to ${zshrc_file}..." ; \
+    echo '' >> "${zshrc_file}" ; \
+    echo '# For RUBY' >> "${zshrc_file}" ; \
+    echo 'export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"' >> "${zshrc_file}")
+
+# Modify .zshrc to add rbenv initialization
+grep 'eval "$(rbenv init' "${zshrc_file}" || \
+  (echo "Adding rbenv init to ${zshrc_file}..." ; \
+    echo '' >> "${zshrc_file}" ; \
+    echo '# Load rbenv Ruby version manager' >> "${zshrc_file}" ; \
+    echo 'eval "$(rbenv init - zsh)"' >> "${zshrc_file}")
