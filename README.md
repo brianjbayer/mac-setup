@@ -1,11 +1,15 @@
 # mac-setup
-A basic collection of idempotent setup scripts for
-Mac-based development
+A basic collection of idempotent setup scripts for Mac-based
+development.  Use these scripts instead of manually setting up
+your basic Mac development environment.
+
+---
 
 ## Recommended Use
-Run the scripts from a local clone of this repository
+Run the scripts from a local clone of this repository.
 
-1. Git clone this repository, use `https:` for initial
+### Getting Started (Prerequisites)
+1. `git clone` this repository, use `https:` for initial
    setup with no SSH
 
 2. Change directory into the cloned repository
@@ -13,30 +17,38 @@ Run the scripts from a local clone of this repository
    cd mac-setup
    ```
 
-3. Configure your git global settings by running
-   ```
-   ./10-mac-config-git-globals
-   ```
+### Configure Your Git Globals
+To configure your git globals using the
+`10-mac-config-git-globals` script, run command...
+```
+./10-mac-config-git-globals
+```
 
-4. Add an SSH key by running
-   ```
-   ./20-mac-add-new-ssh-key
-   ```
+### Add an SSH Key
+To add an SSH key using the
+`20-mac-add-new-ssh-key` script, run command...
+```
+./20-mac-add-new-ssh-key
+```
+
+---
 
 ### Installing Developer Tools and Applications
 
-#### Homebrew Install `git` and `vim`
-Homebrew install `git` and `vim` with the
-[Janus:Vim Distribution](https://github.com/carlhuda/janus)
+> :beer: **These scripts require [Homebrew](https://brew.sh/) package manager**
 
+#### Homebrew Install `git` and `vim`
+To Homebrew install `git` and `vim` with the
+[Janus:Vim Distribution](https://github.com/carlhuda/janus) using the
+`mac-install-git-vim-janus` script, run command...
 ```
 ./mac-install-git-vim-janus
 ```
 
 #### Homebrew Install Apps (Chrome, Firefox, Docker, VS Code)
-Homebrew install `git` and `vim` with the
-[Janus:Vim Distribution](https://github.com/carlhuda/janus)
-
+To Homebrew install your applications like Chrome, Firefox,
+Docker Desktop, and Visual Studio (VS) Code using the
+`mac-install-dev-apps` script, run command...
 ```
 ./mac-install-dev-apps
 ```
@@ -48,8 +60,9 @@ your own applications to install
 ```
 
 #### Homebrew Install `rbenv`
-Homebrew install `rbenv` and add its initialization
-to your `.zshrc` file
+To Homebrew install `rbenv` and add its initialization
+to your `.zshrc` file using the
+`mac-install-rbenv` script, run command...
 ```
 ./mac-install-rbenv
 ```
