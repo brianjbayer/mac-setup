@@ -1,13 +1,4 @@
 #!/usr/bin/env bash
-# -----------------------------------------------
-# This idempotent macOS Bash script uses
-# Homebrew Cask to install basic dev apps...
-# - Browsers
-#   - Chrome
-#   - Firefox
-# - Docker Desktop
-# - VS Code
-# -----------------------------------------------
 
 # Exit script on any errors
 set -e
@@ -16,6 +7,14 @@ set -e
 usage() {
   cat << EOF
 Usage: $(basename $0) [-h] [-a app-list]
+This idempotent macOS Bash script uses Homebrew Cask to install basic dev apps...
+  * Docker Desktop
+  * VS Code
+  * Browsers
+    - Chrome
+    - Firefox
+
+OPTIONS
   -h           display help
   -a app-list  list of brew cask apps to install
                e.g. -a "docker visual-studio-code"
@@ -52,11 +51,11 @@ shift "$(($OPTIND -1))"
 echo "Homebrew installing apps [${dev_apps[*]}]"
 
 # Homebrew is required
-brew help || \
+brew help > /dev/null || \
   (echo "FAIL [1] - Homebrew must be installed first" ; exit 1)
 
 # Install app (or not)
 for app in ${dev_apps[@]}; do
-  brew list --cask "$app" || \
+  brew list --cask "$app" > /dev/null || \
     (echo "brew install --cask ${app}"; brew install --cask "$app")
 done

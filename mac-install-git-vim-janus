@@ -1,14 +1,30 @@
 #!/usr/bin/env bash
-# -----------------------------------------------
-# This idempotent macOS Bash script uses
-# Homebrew to install basic dev tools such as
-# vim and git
-# Note that this installs the Janus vim plugins
-# -----------------------------------------------
 
 # Exit script on any errors
 set -e
 
+usage() {
+  cat << EOF
+Usage: $(basename $0) [-h]
+This idempotent macOS Bash script uses Homebrew to install vim and git
+with the Janus vim plugins
+
+OPTIONS:
+  -h  display help
+EOF
+}
+
+while getopts 'h' opt; do
+  case "$opt" in
+    ?|h)
+    usage
+    exit
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+# -- MAIN --
 echo "Homebrew installing git and vim with janus extensions:"
 dev_tools=(
   git
@@ -16,12 +32,12 @@ dev_tools=(
 )
 
 # Homebrew is required
-brew help || \
+brew help > /dev/null || \
   (echo "FAIL [1] - Homebrew must be installed first" ; exit 1)
 
 # Install dev tools
 for tool in ${dev_tools[@]}; do
-  brew list "$tool" || \
+  brew list "$tool" > /dev/null || \
     (echo "brew install ${tool}"; brew install "$tool")
 done
 
@@ -33,5 +49,5 @@ test -e ~/.vim/janus || \
   (echo "Installing Janus" ; curl -L https://bit.ly/janus-bootstrap | bash)
 
 # Disable tlib plugin for E1208: error
-grep "call janus#disable_plugin('tlib')" ~/.vimrc.before || \
+grep "call janus#disable_plugin('tlib')" ~/.vimrc.before > /dev/null || \
   (echo "call janus#disable_plugin('tlib')") >> ~/.vimrc.before

@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-# -----------------------------------------------
-# This idempotent macOS Bash script creates
-# and adds a new ssh key
-# -----------------------------------------------
 
 # Exit script on any errors
 set -e
@@ -11,6 +7,9 @@ set -e
 usage() {
   cat << EOF
 Usage: $(basename $0) [-h] [-b bitrate] [-C emailaddress] [-f keyfile] [-i hostname] [-t encryptionalgorithm]
+This idempotent macOS Bash script creates and adds a new ssh key
+
+OPTIONS:
   -h                      display help
   -b bitrate              encryption bitrate
   -C emailaddress         email address for key
